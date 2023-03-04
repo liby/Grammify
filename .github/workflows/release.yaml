@@ -18,8 +18,12 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
-      - run: pnpm i
-      - run: pnpm build
+      - name: Install and build
+        run: |
+          cd next-app
+          corepack enable
+          pnpm i
+          pnpm build:linux
 
       - name: Change version
         run: sed -i -e "s/1\.0/${{ steps.get_version.outputs.version-without-v }}/" extension/manifest.json

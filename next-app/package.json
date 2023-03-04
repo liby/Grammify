@@ -2,9 +2,11 @@
   "name": "grammify",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@7.28.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build && next export && mv out/_next out/next && sed -i '' -e 's/\\/_next/\\.\\/next/g' out/**.html && mv out/index.html ../extension && rsync -va --delete-after out/next/ ../extension/next/",
+    "build:linux": "next build && next export && mv out/_next out/next && sed -i 's/\\/_next/\\.\\/next/g' out/**.html && mv out/index.html ../extension && rsync -va --delete-after out/next/ ../extension/next/",
     "start": "next start",
     "lint": "next lint"
   },
