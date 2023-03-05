@@ -15,6 +15,7 @@ out/
 
 # production
 build
+extension/index.html
 
 # misc
 .DS_Store

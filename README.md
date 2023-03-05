@@ -4,13 +4,12 @@
 
 ## 使用截图
 
-![Init](https://i.imgur.com/YjASAsx.png)
-![Settings](https://i.imgur.com/pxxQrRY.png)
-![Check](https://i.imgur.com/wRQubIZ.png)
+![Settings](https://user-images.githubusercontent.com/38807139/222947018-f269a39b-1758-4116-b07d-fb05722516ba.png)
+![Checks](https://user-images.githubusercontent.com/38807139/222947013-793570e4-b34e-47e7-a909-ff0160ba491f.png)
 
 ## 安装方法
 
-目前需要手动下载和安装，敬请谅解
+Chrome Web Store 审核中，目前需要手动下载和安装，敬请谅解
 
 1. 去 Release 页面下载 [grammify-chrome-extension-\*.zip](https://github.com/liby/grammify/releases) 文件
 2. 解压缩下载后的 grammify-chrome-extension-\*.zip 文件
