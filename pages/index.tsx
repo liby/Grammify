@@ -21,7 +21,7 @@ export default function Home() {
               <Button
                 component="a"
                 variant="subtle"
-                href="https://github.com/liby/grammify-extension/"
+                href="https://github.com/liby/grammify/"
                 p={5}
               >
                 <Text c="blue" fw={800}>

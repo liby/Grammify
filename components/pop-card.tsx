@@ -10,15 +10,17 @@ import {
 } from "react";
 import { useInputState } from "@mantine/hooks";
 import { IconAlertCircle, IconChecks, IconSettings } from "@tabler/icons-react";
-import { CompletionResponse, isError } from "#/types/types";
+import { isError } from "#/types/types";
 import { CheckButton } from "./check-button";
 import { models, SettingsPage } from "./settings-page";
+import { polish } from "#/utils/polish";
 
 export function PopCard({ children }: PropsWithChildren) {
   const [inputValue, setInputValue] = useInputState("");
   const [currentModel, setCurrentModelModel] = useState(models[0].value);
   const [tokens, setTokens] = useState("");
   const [output, setOutput] = useState("");
+  const [stream, setStream] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const converter = new showdown.Converter();
@@ -26,77 +28,63 @@ export function PopCard({ children }: PropsWithChildren) {
   const handleCheck = useCallback(
     async (inputValue: string) => {
       setIsLoading(true);
+      setOutput("");
+      const params = {
+        prompt: inputValue,
+        model: currentModel,
+        apiKey: tokens,
+      };
       try {
-        const body = {
-          model: currentModel,
-          temperature: 0,
-          max_tokens: 1000,
-          top_p: 1,
-          frequency_penalty: 1,
-          presence_penalty: 1,
-          messages: [
-            {
-              role: "system",
-              // Inspired by https://github.com/yetone/bob-plugin-openai-polisher/blob/c2c371c141b3eed601e3b8375171c2f239d36fc9/src/main.js#L19
-              content:
-                "Revise the following sentences to make them more clear, concise, and coherent. Please note that you need to list the changes and briefly explain why",
+        if (stream) {
+          await polish({
+            ...params,
+            stream: true,
+            onMessage: (message) => {
+              if (message.role) {
+                return;
+              }
+              setOutput((output) => {
+                return output + message.content;
+              });
             },
-            {
-              role: "user",
-              content: inputValue,
+            onFinish: (reason) => {
+              if (reason !== "stop") {
+                setErrorMessage(`Polishing failed：${reason}`);
+              }
+              setOutput((content) => {
+                if (content.endsWith('"') || content.endsWith("」")) {
+                  return content.slice(0, -1);
+                }
+                return content;
+              });
             },
-          ],
-        };
-
-        const apiKeys = tokens.split(",").map((key) => key.trim());
-        const apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
-
-        if (!apiKey && !process.env.NEXT_PUBLIC_OPEN_AI_TOKEN) {
-          setErrorMessage("请先设置 API Keys");
-          return;
+          });
+        } else {
+          await polish({
+            ...params,
+            stream: false,
+            onMessage: (message) => {
+              setOutput(message.content);
+            },
+          });
         }
-
-        const response = await fetch(
-          "https://api.openai.com/v1/chat/completions",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${
-                apiKey || process.env.NEXT_PUBLIC_OPEN_AI_TOKEN
-              }`,
-            },
-            method: "POST",
-            body: JSON.stringify(body),
-          }
-        );
-        const result: CompletionResponse = await response.json();
-
-        if (result.error) {
-          setErrorMessage(
-            result.error.message
-              ? `${result.error.type}: ${result.error.message}`
-              : "Unknown Error"
-          );
-          return;
-        }
-        setOutput(result.choices[0].message.content);
       } catch (error) {
         if (isError(error)) {
-          setErrorMessage(`${error.type}: ${error.message}`);
+          setErrorMessage(`${error.message}`);
         }
         setErrorMessage("Unknown Error");
       } finally {
         setIsLoading(false);
       }
     },
-    [currentModel, tokens]
+    [currentModel, stream, tokens]
   );
 
   useEffect(() => {
-    chrome.storage?.local.get(
+    chrome.storage?.sync.get(
       {
         apiKeys: "",
-        currentModel: "",
+        currentModel: models[0].value,
       },
       (result) => {
         if (result.apiKeys) {

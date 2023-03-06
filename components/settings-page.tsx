@@ -1,6 +1,6 @@
 import { Button, PasswordInput, Select, Tabs } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export const models = [
   { value: "gpt-3.5-turbo", label: "gpt-3.5-turbo" },
@@ -20,7 +20,6 @@ export function SettingsPage({
   tokens,
   setTokens,
 }: SettingsPageProps) {
-  const apiKeysRef = useRef<HTMLInputElement>(null);
   const [inputToken, setInputToken] = useInputState(tokens);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,16 +72,17 @@ export function SettingsPage({
         mt="xl"
         fullWidth
         loading={isLoading}
+        disabled={!inputToken || inputToken === tokens || isLoading}
         onClick={() => {
           setIsLoading(true);
-          chrome.storage.local.set(
+          chrome.storage?.sync.set(
             {
-              apiKeys: apiKeysRef.current?.value,
+              apiKeys: inputToken,
               currentModel,
             },
             () => {
-              if (apiKeysRef.current?.value) {
-                setTokens(apiKeysRef.current.value);
+              if (inputToken) {
+                setTokens(inputToken);
               }
               setCurrentModelModel(currentModel);
               setIsLoading(false);
