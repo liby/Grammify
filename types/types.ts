@@ -5,7 +5,7 @@ export function isError(errorResponse: any): errorResponse is ErrorResponse {
 export interface ErrorResponse {
   message: string;
   type: string;
-  param: any;
+  param?: any;
   code: number | null;
 }
 export interface CompletionResponse {
@@ -30,4 +30,23 @@ interface Choice {
   index: number;
   logprobs: null | Record<string, any>;
   finish_reason: "length" | "stop";
+}
+
+export type ChatGPTAgent = "user" | "system" | "assistant";
+
+export interface ChatGPTMessage {
+  role: ChatGPTAgent;
+  content: string;
+}
+
+export interface OpenAIStreamPayload {
+  model: string;
+  messages: ChatGPTMessage[];
+  temperature: number;
+  top_p: number;
+  frequency_penalty: number;
+  presence_penalty: number;
+  max_tokens: number;
+  stream: boolean;
+  n: number;
 }
