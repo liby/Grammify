@@ -22,17 +22,18 @@ jobs:
         run: |
           corepack enable
           pnpm i
-          pnpm build:linux
+          pnpm build
 
       - name: Change version
-        run: sed -i -e "s/1\.0/${{ steps.get_version.outputs.version-without-v }}/" extension/manifest.json
+        run: |
+          sed -i -e "s/\"version\": \".*\"/\"version\": \"${{ steps.get_version.outputs.version-without-v }}\"/" extension/manifest.json
 
       - name: Package plugin
         run: |
           mkdir release
-          mv extension release/grammify-chrome-extension
+          mv extension release/grammify-chrome-extension-${{ steps.get_version.outputs.version-without-v }}
           cd release
-          zip -r grammify-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./grammify-chrome-extension/*
+          zip -r grammify-chrome-extension-${{ steps.get_version.outputs.version-without-v }}.zip ./grammify-chrome-extension-${{ steps.get_version.outputs.version-without-v }}/*
 
       - name: Upload plugin to release
         uses: svenstaro/upload-release-action@v2
